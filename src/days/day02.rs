@@ -1,5 +1,4 @@
 use super::Day;
-use crate::util;
 
 pub fn run_day() {
     let day: Day = Day {
@@ -11,10 +10,7 @@ pub fn run_day() {
     };
     day.run_tests(&run_parts);
 
-    fn run_parts(day: &String, part_one: bool, is_test: bool) -> i32 {
-
-        // Read file
-        let lines = util::get_file_lines(day, is_test);
+    fn run_parts(part_one: bool, lines: &Vec<String>) -> i32 {
 
         let mut tot_score = 0;
 

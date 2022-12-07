@@ -1,25 +1,20 @@
-use crate::util;
 use super::Day;
 
 pub fn run_day() {
     let day: Day = Day { day_num: String::from("01"), part_1_test: 24000, part_1: 69912, part_2_test: 45000, part_2: 208180};
     day.run_tests(&run_parts);
 
-    fn run_parts(day: &String, part_one: bool, is_test: bool) -> i32 {
+    fn run_parts(part_one: bool, lines: &Vec<String>) -> i32 {
         
-        // Read file
-        let mut lines = util::get_file_lines(day, is_test);
-
-        // Add empty line at the bottom
-        lines.push(String::from(""));
-
         let mut n_max = 0;
         let mut n_cur = 0;
         let mut top_3 = [0,0,0];
 
-        for line in lines {
+        let lines_len = lines.len();
+        for line_num in 0..(lines_len + 1) {
+
             // Empty line means next elf
-            if line.is_empty() {
+            if line_num == lines_len || lines[line_num].is_empty() {
                 if n_cur > n_max{
                     n_max = n_cur;
                 }
@@ -35,8 +30,8 @@ pub fn run_day() {
                     top_3[2] = n_cur;
                 }
                 n_cur = 0;
-            } else      {
-                let x: i32 = line.trim().parse().unwrap();
+            } else if line_num < lines_len {
+                let x: i32 = lines[line_num].trim().parse().unwrap();
                 n_cur = n_cur + x;
             }
         }

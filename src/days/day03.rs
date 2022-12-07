@@ -1,20 +1,16 @@
 use super::Day;
-use crate::util;
 
 pub fn run_day() {
     let day: Day = Day {
         day_num: String::from("03"),
         part_1_test: 157,
-        part_1: 12794,
+        part_1: 7763,
         part_2_test: 12,
         part_2: 14979,
     };
     day.run_tests(&run_parts);
 
-    fn run_parts(day: &String, part_one: bool, is_test: bool) -> i32 {
-
-        // Read file
-        let lines = util::get_file_lines(day, is_test);
+    fn run_parts(part_one: bool, lines: &Vec<String>) -> i32 {
 
         let mut tot_score: i32 = 0;
 
