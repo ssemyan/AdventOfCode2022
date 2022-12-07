@@ -1,5 +1,5 @@
 use super::Day;
-use crate::{days::print_test, util};
+use crate::util;
 
 pub fn run_day() {
     let day: Day = Day {
@@ -12,7 +12,6 @@ pub fn run_day() {
     day.run_tests(&run_parts);
 
     fn run_parts(day: &String, part_one: bool, is_test: bool) -> i32 {
-        print_test(part_one, day, is_test);
 
         // Read file
         let lines = util::get_file_lines(day, is_test);
@@ -29,7 +28,6 @@ pub fn run_day() {
             tot_score = tot_score + cur_score;
         }
 
-        println!("Total: {}", tot_score);
         tot_score
     }
 }

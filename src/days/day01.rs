@@ -1,4 +1,4 @@
-use crate::{util, days::print_test};
+use crate::util;
 use super::Day;
 
 pub fn run_day() {
@@ -6,8 +6,6 @@ pub fn run_day() {
     day.run_tests(&run_parts);
 
     fn run_parts(day: &String, part_one: bool, is_test: bool) -> i32 {
-        
-        print_test(part_one, day, is_test);
         
         // Read file
         let mut lines = util::get_file_lines(day, is_test);
@@ -44,12 +42,10 @@ pub fn run_day() {
         }
     
         if part_one {
-            println!("Max: {}", n_max);
             return n_max;
         } 
 
         let top_3_sum = top_3[0] + top_3[1] + top_3[2];
-        println!("Sum of top 3: {}", top_3_sum);
         top_3_sum
 
     }
