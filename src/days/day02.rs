@@ -3,14 +3,14 @@ use super::Day;
 pub fn run_day() {
     let day: Day = Day {
         day_num: String::from("02"),
-        part_1_test: 15,
-        part_1: 12794,
-        part_2_test: 12,
-        part_2: 14979,
+        part_1_test: String::from("15"),
+        part_1: String::from("12794"),
+        part_2_test: String::from("12"),
+        part_2: String::from("14979")
     };
     day.run_tests(&run_parts);
 
-    fn run_parts(part_one: bool, lines: &Vec<String>) -> i32 {
+    fn run_parts(part_one: bool, lines: &Vec<String>) -> String {
 
         let mut tot_score = 0;
 
@@ -24,7 +24,7 @@ pub fn run_day() {
             tot_score = tot_score + cur_score;
         }
 
-        tot_score
+        tot_score.to_string()
     }
 }
 

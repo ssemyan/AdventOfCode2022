@@ -3,14 +3,14 @@ use super::Day;
 pub fn run_day() {
     let day: Day = Day {
         day_num: String::from("03"),
-        part_1_test: 157,
-        part_1: 7763,
-        part_2_test: 70,
-        part_2: 2569
+        part_1_test: String::from("157"),
+        part_1: String::from("7763"),
+        part_2_test: String::from("70"),
+        part_2: String::from("2569")
     };
     day.run_tests(&run_parts);
 
-    fn run_parts(part_one: bool, lines: &Vec<String>) -> i32 {
+    fn run_parts(part_one: bool, lines: &Vec<String>) -> String {
         let mut tot_score: i32 = 0;
 
         if part_one {
@@ -26,7 +26,7 @@ pub fn run_day() {
                 //println!("Found common {} with val {}", item, item_val);
                 tot_score = tot_score + (item_val as i32);
             }
-            return tot_score;
+            return tot_score.to_string();
         }
 
         // Part two
@@ -50,7 +50,7 @@ pub fn run_day() {
             cur_line = cur_line + 3;
         }
 
-        tot_score
+        tot_score.to_string()
     }
 }
 

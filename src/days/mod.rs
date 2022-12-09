@@ -3,6 +3,7 @@ mod day01;
 mod day02;
 mod day03;
 mod day04;
+mod day05;
 
 pub fn run_day(day: &str) -> bool {
     
@@ -12,7 +13,7 @@ pub fn run_day(day: &str) -> bool {
         "02" => day02::run_day(),
         "03" => day03::run_day(),
         "04" => day04::run_day(),
-        
+        "05" => day05::run_day(),
         _ => return false
     }
     true
@@ -20,14 +21,14 @@ pub fn run_day(day: &str) -> bool {
 
 struct Day {
     day_num: String,
-    part_1: i32,
-    part_1_test: i32,
-    part_2: i32,
-    part_2_test: i32
+    part_1: String,
+    part_1_test: String,
+    part_2: String,
+    part_2_test: String
 }
 
 impl Day {
-    fn run_tests(&self, part_runner: &dyn Fn(bool, &Vec<String>) -> i32) {
+    fn run_tests(&self, part_runner: &dyn Fn(bool, &Vec<String>) -> String) {
 
         // test file
         let tlines = util::get_file_lines(&self.day_num, true);

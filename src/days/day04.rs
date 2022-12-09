@@ -4,14 +4,14 @@ use regex::Regex;
 pub fn run_day() {
     let day: Day = Day {
         day_num: String::from("04"),
-        part_1_test: 2,
-        part_1: 500,
-        part_2_test: 4,
-        part_2: 815,
+        part_1_test: String::from("2"),
+        part_1: String::from("500"),
+        part_2_test: String::from("4"),
+        part_2: String::from("815"),
     };
     day.run_tests(&run_parts);
 
-    fn run_parts(part_one: bool, lines: &Vec<String>) -> i32 {
+    fn run_parts(part_one: bool, lines: &Vec<String>) -> String {
         let mut tot_pairs: i32 = 0;
         let re = Regex::new(r"^(\d+)-(\d+),(\d+)-(\d+)$").unwrap();
 
@@ -36,6 +36,6 @@ pub fn run_day() {
                 } 
         }
 
-        tot_pairs
+        tot_pairs.to_string()
     }
 }
