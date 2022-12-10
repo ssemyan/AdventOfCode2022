@@ -4,34 +4,52 @@ pub fn run_day() {
     let day: Day = Day {
         day_num: String::from("06"),
         part_1_test: String::from("11"),
-        part_1: String::from("JRVNHHCSJ"),
-        part_2_test: String::from("MCD"),
-        part_2: String::from("GNFBSBJLH"),
+        part_1: String::from("1760"),
+        part_2_test: String::from("26"),
+        part_2: String::from("2974"),
     };
     day.run_tests(&run_parts);
 
     fn run_parts(part_one: bool, lines: &Vec<String>) -> String {
-        
-        let mut return_val = 0;
 
         let line = lines[0].as_bytes();
-        let mut cur_char = 3;
-        
+        let mut num_unique: usize = 4;
+        if !part_one {
+            num_unique = 14;
+        }
+        let mut cur_char = num_unique - 1;
+
         loop {
-            if cur_char > (line.len() - 1){
+            if cur_char > (line.len() - 1) {
                 break;
             }
 
-            // Compare prev 3 chars
-            if line[cur_char] == line[cur_char - 1] || line[cur_char] == line[cur_char - 2] || line[cur_char] == line[cur_char - 3] 
-                || line[cur_char - 1] == line[cur_char - 2] || line[cur_char - 1] == line[cur_char - 3] || line[cur_char - 2] == line[cur_char - 3] {
-
-                    cur_char = cur_char + 1;
-                } else {
-                    return (cur_char + 1).to_string()
-                }            
+            // Compare prev N chars
+            let is_unique = is_unique(num_unique, &line[cur_char - (num_unique - 1)..cur_char + 1]);
+            if is_unique {
+                return (cur_char + 1).to_string();
+            } else {
+                cur_char = cur_char + 1;
+            }
         }
-   
-        return_val.to_string()
+
+        String::from("Failed to find header")
+    }
+
+    fn is_unique(num_chars: usize, line: &[u8]) -> bool {
+        let l_size = line.len();
+        if l_size == 1 {
+            return true;
+        }
+
+        // Verify curr st
+        for id in 1..l_size {
+            if line[0] == line[id] {
+                return false;
+            }
+        }
+
+        // Recurse for the rest of the line
+        is_unique(num_chars, &line[1..])
     }
 }
