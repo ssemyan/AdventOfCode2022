@@ -6,8 +6,8 @@ pub fn run_day() {
         day_num: String::from("05"),
         part_1_test: String::from("CMZ"),
         part_1: String::from("JRVNHHCSJ"),
-        part_2_test: String::from("CMZ"),
-        part_2: String::from("CMZ"),
+        part_2_test: String::from("MCD"),
+        part_2: String::from("GNFBSBJLH"),
     };
     day.run_tests(&run_parts);
 
@@ -76,9 +76,14 @@ pub fn run_day() {
             let move_to: usize = vals.get(3).map_or("", |m| m.as_str()).parse::<usize>().unwrap() - 1; // OMG is this ugly
             //println!("Moving {} from {} to {}", num_to_move, move_from, move_to);
 
-            for _ in 0..num_to_move {
+            for idx in 0..num_to_move {
                 let element: char = stacks[move_from][0].clone();
-                stacks[move_to].insert(0, element);
+                if part_one {
+                    stacks[move_to].insert(0, element);
+                } else {
+                    stacks[move_to].insert(idx as usize, element);
+                }
+            
                 stacks[move_from].remove(0);
             }
 
