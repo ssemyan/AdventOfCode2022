@@ -56,7 +56,7 @@ pub fn run_day() {
         let cur_space = 70000000 - node_list[0].size;
         let space_needed = 30000000 - cur_space;
         for node in node_list {
-            //println!("Node {} size {}", node.name, node.size);
+            println!("Node {} size {}", node.name, node.size);
             if part_one {
                 if node.size <= 100000 {
                     size = size + node.size;
