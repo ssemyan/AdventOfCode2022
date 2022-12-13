@@ -5,7 +5,7 @@ pub fn run_day() {
         day_num: String::from("07"),
         part_1_test: String::from("95437"),
         part_1: String::from("1642503"),
-        part_2_test: String::from("26"),
+        part_2_test: String::from("24933642"),
         part_2: String::from("2974"),
     };
     day.run_tests(&run_parts);
@@ -53,10 +53,21 @@ pub fn run_day() {
 
         // Tree is done, add up
         let mut size = 0;
+        let cur_space = 70000000 - node_list[0].size;
+        let space_needed = 30000000 - cur_space;
         for node in node_list {
             //println!("Node {} size {}", node.name, node.size);
-            if node.size <= 100000 {
-                size = size + node.size;
+            if part_one {
+                if node.size <= 100000 {
+                    size = size + node.size;
+                }
+            } else {
+                // Part two
+                if node.size >= space_needed {
+                    if size == 0 || node.size < size {
+                        size = node.size;
+                    }
+                }
             }
         }
 
