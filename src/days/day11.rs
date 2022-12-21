@@ -20,7 +20,7 @@ pub fn run_day() {
         let mut sqr = false;
         let mut divis = 0;
         let mut d_true = 0;
-        let mut d_false = 0;
+        let mut d_false: i32;
 
         for line in lines {
             // Monkey 0:
@@ -96,7 +96,7 @@ pub fn run_day() {
             rounds = 10000;
         }
 
-        for round in 0..rounds {
+        for _ in 0..rounds {
             //println!("Round {}", round);
 
             // Cycle through the monkeys
