@@ -5,8 +5,8 @@ pub fn run_day() {
         day_num: String::from("11"),
         part_1_test: String::from("10605"),
         part_1: String::from("51075"),
-        part_2_test: String::from(""),
-        part_2: String::from(""),
+        part_2_test: String::from("2713310158"),
+        part_2: String::from("11741456163"),
     };
     day.run_tests(&run_parts);
 
@@ -54,8 +54,8 @@ pub fn run_day() {
                             d_false = line[30..].parse::<i32>().unwrap();
 
                             // Last line of desc, build monkey
-                            let i_items: Vec<i32> =
-                                items.iter().map(|x| x.parse::<i32>().unwrap()).collect();
+                            let i_items: Vec<usize> =
+                                items.iter().map(|x| x.parse::<usize>().unwrap()).collect();
                             let monk = Monkey {
                                 add: add,
                                 sqr: sqr,
@@ -64,7 +64,7 @@ pub fn run_day() {
                                 d_true: d_true as usize,
                                 divis: divis,
                                 items: i_items,
-                                num_inspect: 0
+                                num_inspect: 0,
                             };
                             monks.push(monk);
                         }
@@ -74,16 +74,35 @@ pub fn run_day() {
             }
         }
 
-        let mut m_insp: Vec<i32> = Vec::new();
+        // Set up the mitems (a version of the item for each monkey, since each monkey only cares whether it is divisable by their number)
+        let mut mitems: Vec<Vec<i32>> = Vec::new();
+        let monk_len = monks.len();
+        for idx in 0..monk_len {
+            let item_cnt = monks[idx].items.len();
+            for i_idx in 0..item_cnt {
+                let mut mitem: Vec<i32> = Vec::new();
+                for _ in 0..monk_len {
+                    let item = monks[idx].items[i_idx] as i32;
+                    mitem.push(item);
+                }
+                mitems.push(mitem);
+                monks[idx].items[i_idx] = mitems.len() - 1; // Point the item to it's index in the vector
+            }
+        }
 
-        // Do 20 rounds
-        for round in 0..20 {
-            println!("Round {}", round);
+        // Do the rounds
+        let mut rounds = 20;
+        if !part_one {
+            rounds = 10000;
+        }
+
+        for round in 0..rounds {
+            //println!("Round {}", round);
 
             // Cycle through the monkeys
             for idx in 0..monks.len() {
                 
-                // Mark the number of inspections 
+                // Mark the number of upcoming inspections
                 let insp_num = monks[idx].items.len() as i32;
                 monks[idx].num_inspect = monks[idx].num_inspect + insp_num;
 
@@ -93,37 +112,53 @@ pub fn run_day() {
                         break;
                     }
 
-                    // Process item
-                    let mut item = monks[idx].items[0];
-                    //print!("Monkey {} item {} ", idx, item);
-                    if monks[idx].sqr {
-                        item = item * item;
-                    } else if monks[idx].add.is_some() {
-                        item = item + monks[idx].add.unwrap();
-                    } else {
-                        item = item * monks[idx].mult.unwrap();
-                    }
-                    item = item / 3;
-                    //println!("new level {}", item);
+                    // Process items in order
+                    let item_index = monks[idx].items[0];
+                    //println!("Monkey {} item {} ", idx, item_index);
 
-                    let remainder = item % monks[idx].divis;
+                    for iidx in 0..monk_len {
+
+                        let mut item = mitems[item_index][iidx];
+
+                        if monks[idx].sqr {
+                            item = item * item;
+                        } else if monks[idx].add.is_some() {
+                            item = item + monks[idx].add.unwrap();
+                        } else {
+                            item = item * monks[idx].mult.unwrap();
+                        }
+
+                        if part_one {
+                            item = item / 3;
+                        } else {
+                            // For part two, only keep the mod for the throw test of each monkey
+                            item = (item % monks[iidx].divis) + monks[iidx].divis;
+                        }
+
+                        //println!("new level {}", item);
+                        mitems[item_index][iidx] = item;
+                    }
+
+                    // Do the test to see where to throw to next
+                    let remainder = mitems[item_index][idx] % monks[idx].divis;
                     let mut transfer_to = monks[idx].d_true;
                     if remainder != 0 {
                         transfer_to = monks[idx].d_false;
                     }
-                    //println!("Transfering to {}", transfer_to);
-                    monks[transfer_to].items.push(item);
+                    //println!("Transfering {} to {}",  mitems[item_index][idx], transfer_to);
+
+                    // Now do the transfer
+                    monks[transfer_to].items.push(item_index);
                     monks[idx].items.remove(0);
                 }
             }
 
-            for idx in 0..monks.len() {
-                print!("Monkey {}: ", idx);
-                for item in &monks[idx].items {
-                    print!("{}, ", item);
-                }
-                println!();
-            }
+            // if !part_one && (round == 0 || round == 19 || round == 999 || round == 9999) {
+            //     println!("Round {}", round + 1);
+            //     for idx in 0..monk_len {
+            //         println!("Monkey {}: {} ", idx, monks[idx].num_inspect);
+            //     }
+            // }
         }
 
         let mut top_insp = 0;
@@ -140,11 +175,11 @@ pub fn run_day() {
 
         println!("Top: {} and {}", top_insp, sec_insp);
 
-        (top_insp * sec_insp).to_string()
+        (top_insp as i64 * sec_insp as i64).to_string()
     }
 
     struct Monkey {
-        items: Vec<i32>,
+        items: Vec<usize>,
         mult: Option<i32>,
         add: Option<i32>,
         sqr: bool,
