@@ -23,8 +23,11 @@ pub fn run_day() {
         // set up hashtable so we know where we have been
         let mut poslist: HashMap<String, i32> = HashMap::new();
 
+        // set up global menenization (sp)
+        let mut menlist: HashMap<String, i32> = HashMap::new();
+
         // Start wandering, end when we get to E
-        let path_cnt = find_path(&map, 0, 0, &mut poslist, b'a', -1, i32::MAX);
+        let path_cnt = find_path(&map, 0, 0, &mut poslist, b'a', -1, i32::MAX, &mut menlist);
 
         path_cnt.to_string()
     }
@@ -39,12 +42,20 @@ fn find_path(
     prev_alt: u8,
     move_cnt: i32,
     min_move_cnt: i32,
+    menlist: &mut HashMap<String, i32>,
 ) -> i32 {
     // add the move
     let new_move_cnt = move_cnt + 1;
 
     // If we found a shorter path abandon this path
     if new_move_cnt > min_move_cnt {
+        return i32::MAX;
+    }
+
+    // Check the men list if we have seen a shorter route
+    let p_visit = check_visit(cur_x, cur_y, &menlist);
+    if p_visit.is_some() && p_visit.unwrap() < &new_move_cnt {
+        // Found a shorter path on a previous visit, abandon this path
         return i32::MAX;
     }
 
@@ -71,14 +82,17 @@ fn find_path(
         return new_move_cnt;
     }
 
-    // record the visit
-    mark_visit(cur_x, cur_y, poslist);
+    // record the visit for this route - just use a 1
+    mark_visit(cur_x, cur_y, poslist, 1);
+
+    // also mark it for future lookups
+    mark_visit(cur_x, cur_y, menlist, new_move_cnt);
 
     // Try all directions that are not more than one above and that are unvisited
     let mut min_path = i32::MAX; // Set the min path to the max val
 
     // N
-    if cur_y > 0 && unvisited(cur_x, cur_y - 1, &poslist) {
+    if cur_y > 0 && check_visit(cur_x, cur_y - 1, &poslist).is_none() {
         let n_cost = find_path(
             map,
             cur_x,
@@ -87,6 +101,7 @@ fn find_path(
             alt,
             new_move_cnt,
             min_move_cnt,
+            menlist,
         );
         if n_cost < min_path {
             min_path = n_cost;
@@ -94,7 +109,7 @@ fn find_path(
     }
 
     // S
-    if cur_y < map.len() - 1 && unvisited(cur_x, cur_y + 1, &poslist) {
+    if cur_y < map.len() - 1 && check_visit(cur_x, cur_y + 1, &poslist).is_none() {
         let n_cost = find_path(
             map,
             cur_x,
@@ -103,6 +118,7 @@ fn find_path(
             alt,
             new_move_cnt,
             min_move_cnt,
+            menlist,
         );
         if n_cost < min_path {
             min_path = n_cost;
@@ -110,7 +126,7 @@ fn find_path(
     }
 
     // E
-    if cur_x < map[0].len() - 1 && unvisited(cur_x + 1, cur_y, &poslist) {
+    if cur_x < map[0].len() - 1 && check_visit(cur_x + 1, cur_y, &poslist).is_none() {
         let n_cost = find_path(
             map,
             cur_x + 1,
@@ -119,6 +135,7 @@ fn find_path(
             alt,
             new_move_cnt,
             min_move_cnt,
+            menlist,
         );
         if n_cost < min_path {
             min_path = n_cost;
@@ -126,7 +143,7 @@ fn find_path(
     }
 
     // W
-    if cur_x > 0 && unvisited(cur_x - 1, cur_y, &poslist) {
+    if cur_x > 0 && check_visit(cur_x - 1, cur_y, &poslist).is_none() {
         let n_cost = find_path(
             map,
             cur_x - 1,
@@ -135,6 +152,7 @@ fn find_path(
             alt,
             new_move_cnt,
             min_move_cnt,
+            menlist,
         );
         if n_cost < min_path {
             min_path = n_cost;
@@ -144,14 +162,14 @@ fn find_path(
     min_path
 }
 
-fn mark_visit(cur_x: usize, cur_y: usize, poslist: &mut HashMap<String, i32>) {
+fn mark_visit(cur_x: usize, cur_y: usize, poslist: &mut HashMap<String, i32>, val: i32) {
     let key = get_key(cur_x, cur_y);
-    poslist.insert(key, 1);
+    poslist.insert(key, val );
 }
 
-fn unvisited(cur_x: usize, cur_y: usize, poslist: &HashMap<String, i32>) -> bool {
+fn check_visit(cur_x: usize, cur_y: usize, poslist: &HashMap<String, i32>) -> Option<&i32> {
     let key = get_key(cur_x, cur_y);
-    !poslist.contains_key(&key)
+    poslist.get(&key)
 }
 
 fn get_key(cur_x: usize, cur_y: usize) -> String {
