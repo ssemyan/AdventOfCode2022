@@ -83,8 +83,7 @@ struct PPoint {
 
 fn check_point(map: &Vec<Vec<u8>>, new_x: usize, new_y: usize, menlist: &HashMap<String, i32>, cur_alt: u8) -> bool {
     // new node must be on the map and unvisited
-    if new_y < map.len() && new_x < map[0].len() && 
-        (check_visit(new_x, new_y, menlist).is_none() ||  {
+    if new_y < map.len() && new_x < map[0].len() && check_visit(new_x, new_y, menlist).is_none() {
         let mut new_alt = map[new_y][new_x];
         if new_alt == b'E' {
             new_alt = b'z';
