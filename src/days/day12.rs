@@ -32,13 +32,22 @@ pub fn run_day() {
 
         // loop until we get to the end
         loop {
-            // the pop first point as it is the top guess
-            let p = points.remove(0);            
+            // get the point with the lowest dist
+            let mut lowest_dist: usize = 0;
+            let mut cur_low_dist = i32::MAX;
+            for idx in 0..points.len() {
+                if points[idx].dist < cur_low_dist {
+                    cur_low_dist = points[idx].dist;
+                    lowest_dist = idx;
+                }
+            }
+            let p = points.remove(lowest_dist);            
 
             // get the altitude
             let mut alt = map[p.y][p.x];
             if alt == b'E' {
                 // at the end
+                print_map(&map, &k_points);
                 return p.dist.to_string();
             }
 
@@ -68,10 +77,28 @@ pub fn run_day() {
     }
 }
 
+fn print_map(map: &Vec<Vec<u8>>, k_points: &HashMap<String, i32>) {
+    for y in 0..map.len() {
+        for x in 0..map[0].len() {
+            let val = check_visit(x, y, k_points);
+            if val.is_none() {
+                print!("-...");
+            } else {
+                if map[y][x] == b'E' {
+                    print!("- E ");
+                } else {
+                    print!("-{:03}", val.unwrap());
+                }
+            }
+        }
+        println!("");
+    }
+}
+
 fn try_add_point(map: &Vec<Vec<u8>>, points: &mut Vec<PPoint>, p: PPoint, k_points: &mut HashMap<String, i32>, alt: u8) {
     if check_point(&map, p.x, p.y, &k_points, alt) {
         mark_visit(p.x, p.y, k_points, p.dist);
-        points.insert(0, p);
+        points.push(p);
     }
 }
 
