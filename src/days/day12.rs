@@ -7,8 +7,8 @@ pub fn run_day() {
         day_num: String::from("12"),
         part_1_test: String::from("31"),
         part_1: String::from("447"),
-        part_2_test: String::from(""),
-        part_2: String::from(""),
+        part_2_test: String::from("29"),
+        part_2: String::from("446"),
     };
     day.run_tests(&run_parts);
 
@@ -20,62 +20,76 @@ pub fn run_day() {
             map.push(chars);
         }
 
-        // set up the list of points to work through
-        let mut points: Vec<PPoint> = Vec::new();
+        // create the list of starting points
+        let mut starts: Vec<PPoint> = Vec::new();
 
-        // Set up the list of known points
-        let mut k_points: HashMap<String, i32> = HashMap::new();
-
-        // Find the start
-        let mut start_x: usize = 0;
-        let mut start_y: usize = 0;
+        
+        // can start from multiple spots (just brute force it)
         for y in 0..map.len() {
             for x in 0..map[0].len() {
-                if map[y as usize][x as usize] == b'S' {
-                    start_x = x;
-                    start_y = y;
+                if map[y as usize][x as usize] == b'S' || (!part_one && map[y as usize][x as usize] == b'a') {
+                    starts.push(PPoint { y: y, x: x, dist: 0 });
                 }
             }
         }
+        
+        let mut min_dist = i32::MAX;
+        for pp in starts {
+            // set up the list of points to work through
+            let mut points: Vec<PPoint> = Vec::new();
 
-        // add the first point and mark as visited
-        points.push(PPoint {y: start_y, x: start_x, dist: 0});
-        mark_visit(start_x, start_y, &mut k_points, 0);
+            // Set up the list of known points
+            let mut k_points: HashMap<String, i32> = HashMap::new();
 
-        // loop until we get to the end
-        loop {
-            let p = points.remove(0); 
+            // add the first point and mark as visited
+            points.push(PPoint {y: pp.y, x: pp.x, dist: 0});
+            mark_visit(pp.x, pp.y, &mut k_points, 0);
 
-            // get the altitude
-            let mut alt = map[p.y][p.x];
-            if alt == b'E' {
-                // at the end
-                return p.dist.to_string();
+            // loop until we get to the end
+            loop {
+                // in part two we may hit a dead end
+                if points.len() == 0 {
+                    break;
+                }
+
+                let p = points.remove(0); 
+
+                // get the altitude
+                let mut alt = map[p.y][p.x];
+                if alt == b'E' {
+                    // at the end
+                    if p.dist < min_dist {
+                        min_dist = p.dist;
+                    }
+                    break;
+                    //return p.dist.to_string();
+                }
+
+                if alt == b'S' {
+                    // at the start
+                    alt = b'a';
+                }
+
+                // Find distance of each neighbor (will be 1) 
+
+                // N
+                if p.y > 0 {
+                    try_add_point(&map, &mut points, PPoint{y: p.y - 1, x: p.x, dist: p.dist + 1}, &mut k_points, alt);
+                }
+
+                // S
+                try_add_point(&map, &mut points, PPoint{y: p.y + 1, x: p.x, dist: p.dist + 1}, &mut k_points, alt);
+
+                // W
+                if p.x > 0 {
+                    try_add_point(&map, &mut points, PPoint{y: p.y, x: p.x - 1, dist: p.dist + 1}, &mut k_points, alt);
+                }
+
+                // E
+                try_add_point(&map, &mut points, PPoint{y: p.y, x: p.x + 1, dist: p.dist + 1}, &mut k_points, alt);
             }
-
-            if alt == b'S' {
-                // at the start
-                alt = b'a';
-            }
-
-            // Find distance of each neighbor (will be 1) 
-
-            // N
-            if p.y > 0 {
-                try_add_point(&map, &mut points, PPoint{y: p.y - 1, x: p.x, dist: p.dist + 1}, &mut k_points, alt);
-            }
-
-            // S
-            try_add_point(&map, &mut points, PPoint{y: p.y + 1, x: p.x, dist: p.dist + 1}, &mut k_points, alt);
-
-            // W
-            if p.x > 0 {
-                try_add_point(&map, &mut points, PPoint{y: p.y, x: p.x - 1, dist: p.dist + 1}, &mut k_points, alt);
-            }
-
-            // E
-            try_add_point(&map, &mut points, PPoint{y: p.y, x: p.x + 1, dist: p.dist + 1}, &mut k_points, alt);
         }
+        min_dist.to_string()
     }
 }
 
