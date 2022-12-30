@@ -6,7 +6,7 @@ pub fn run_day() {
     let day: Day = Day {
         day_num: String::from("12"),
         part_1_test: String::from("31"),
-        part_1: String::from(""),
+        part_1: String::from("447"),
         part_2_test: String::from(""),
         part_2: String::from(""),
     };
@@ -26,28 +26,30 @@ pub fn run_day() {
         // Set up the list of known points
         let mut k_points: HashMap<String, i32> = HashMap::new();
 
+        // Find the start
+        let mut start_x: usize = 0;
+        let mut start_y: usize = 0;
+        for y in 0..map.len() {
+            for x in 0..map[0].len() {
+                if map[y as usize][x as usize] == b'S' {
+                    start_x = x;
+                    start_y = y;
+                }
+            }
+        }
+
         // add the first point and mark as visited
-        points.push(PPoint {y: 0, x: 0, dist: 0});
-        mark_visit(0, 0, &mut k_points, 0);
+        points.push(PPoint {y: start_y, x: start_x, dist: 0});
+        mark_visit(start_x, start_y, &mut k_points, 0);
 
         // loop until we get to the end
         loop {
-            // get the point with the lowest dist
-            let mut lowest_dist: usize = 0;
-            let mut cur_low_dist = i32::MAX;
-            for idx in 0..points.len() {
-                if points[idx].dist < cur_low_dist {
-                    cur_low_dist = points[idx].dist;
-                    lowest_dist = idx;
-                }
-            }
-            let p = points.remove(lowest_dist);            
+            let p = points.remove(0); 
 
             // get the altitude
             let mut alt = map[p.y][p.x];
             if alt == b'E' {
                 // at the end
-                print_map(&map, &k_points);
                 return p.dist.to_string();
             }
 
@@ -77,24 +79,6 @@ pub fn run_day() {
     }
 }
 
-fn print_map(map: &Vec<Vec<u8>>, k_points: &HashMap<String, i32>) {
-    for y in 0..map.len() {
-        for x in 0..map[0].len() {
-            let val = check_visit(x, y, k_points);
-            if val.is_none() {
-                print!("-...");
-            } else {
-                if map[y][x] == b'E' {
-                    print!("- E ");
-                } else {
-                    print!("-{:03}", val.unwrap());
-                }
-            }
-        }
-        println!("");
-    }
-}
-
 fn try_add_point(map: &Vec<Vec<u8>>, points: &mut Vec<PPoint>, p: PPoint, k_points: &mut HashMap<String, i32>, alt: u8) {
     if check_point(&map, p.x, p.y, &k_points, alt) {
         mark_visit(p.x, p.y, k_points, p.dist);
@@ -105,7 +89,7 @@ fn try_add_point(map: &Vec<Vec<u8>>, points: &mut Vec<PPoint>, p: PPoint, k_poin
 struct PPoint {
     y: usize,
     x: usize,
-    dist: i32
+    dist: i32,
 }
 
 fn check_point(map: &Vec<Vec<u8>>, new_x: usize, new_y: usize, menlist: &HashMap<String, i32>, cur_alt: u8) -> bool {
