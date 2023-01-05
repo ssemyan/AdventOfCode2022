@@ -8,8 +8,8 @@ pub fn run_day() {
         day_num: String::from("13"),
         part_1_test: String::from("13"),
         part_1: String::from("6046"), 
-        part_2_test: String::from(""),
-        part_2: String::from(""), 
+        part_2_test: String::from("140"),
+        part_2: String::from("21423"), 
     };
     day.run_tests(&run_parts);
 
@@ -21,6 +21,15 @@ pub fn run_day() {
         let mut sum_good_pairs = 0;
         let mut pair_num = 1;
 
+        // Save all the packets
+        let mut packets: Vec<Packet> = Vec::new();
+
+        // add the dividers
+        let dpack1 = get_map(&String::from("[[2]]"), &re);
+        let dpack2 = get_map(&String::from("[[6]]"), &re);
+        packets.push(dpack1);
+        packets.push(dpack2);
+
         loop {
             if line_num > lines.len() {//} || line_num > 30 {
                 break;
@@ -29,7 +38,7 @@ pub fn run_day() {
             // first pair
             let packet1 = get_map(&lines[line_num], &re);
             let packet2 = get_map(&lines[line_num + 1], &re);
-
+            
             // Walk the pairs 
             let ret = check_packets(&packet1.map, packet1.root, 0, &packet2.map, packet2.root, 0);
             let is_good = ret.is_none() || ret.unwrap();
@@ -38,12 +47,56 @@ pub fn run_day() {
                 sum_good_pairs = sum_good_pairs + pair_num;
             }
 
+            // add for part two
+            packets.push(packet1);
+            packets.push(packet2);
+
             // skip blank line
             line_num = line_num + 3;
             pair_num = pair_num + 1;
         }
         
-        sum_good_pairs.to_string()
+        if part_one {
+            return sum_good_pairs.to_string();
+        }
+
+        // part two - just bubble sort it
+        let mut div1_pos: i32 = -1;
+        let mut cur_pos = 0;
+
+        loop {
+
+            // try each of the items in the vec 
+            for id1 in 0..packets.len() {
+                let packet1 = &packets[id1];
+                let mut is_top = true;
+
+                for id2 in 0..packets.len() {
+                    if id1 != id2 {
+                        let packet2 = &packets[id2];
+                        let ret = check_packets(&packet1.map, packet1.root, 0, &packet2.map, packet2.root, 0);
+                        let is_good = ret.is_none() || ret.unwrap();
+                        if !is_good {
+                            is_top = false;
+                            break;
+                        }
+                    }
+                }
+                if is_top {
+                    // found the top most item - see if it was a divider (0 & 1)
+                    //println!("Found the top at pos {}", cur_pos);
+                    cur_pos = cur_pos + 1;
+                    if div1_pos == -1 && id1 < 2 {
+                        div1_pos = cur_pos;
+                    } else if id1 == 0 {
+                        return (div1_pos * cur_pos).to_string();
+                    }
+                    // remove it from the list
+                    packets.remove(id1);
+                    break;
+                }
+            }
+        }
     }
 }
 
