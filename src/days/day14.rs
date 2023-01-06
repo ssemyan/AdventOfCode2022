@@ -7,8 +7,8 @@ pub fn run_day() {
         day_num: String::from("14"),
         part_1_test: String::from("24"),
         part_1: String::from("638"),
-        part_2_test: String::from(""),
-        part_2: String::from(""),
+        part_2_test: String::from("93"),
+        part_2: String::from("31722"),
     };
     day.run_tests(&run_parts);
 
@@ -73,9 +73,14 @@ pub fn run_day() {
             let sx = 500;
             let sy = 0;
 
-            if !try_set_sand(sx, sy, &mut map, max_y) {
+            if !try_set_sand(sx, sy, &mut map, max_y, part_one) {
                 break;
             }
+            tot_sand = tot_sand + 1;
+        }
+
+        if !part_one {
+            // add last sand
             tot_sand = tot_sand + 1;
         }
 
@@ -83,23 +88,28 @@ pub fn run_day() {
     }
 }
 
-fn try_set_sand(sx: i32, sy: i32, map: &mut HashMap<String, i32>, max_y: i32) -> bool {
+fn try_set_sand(sx: i32, sy: i32, map: &mut HashMap<String, i32>, max_y: i32, part_one: bool) -> bool {
     
-    if sy > max_y {
+    if part_one && sy > max_y {
         return false; // we have fallen past the lowest wall
-    }
+    } 
 
     // check below
-    if check_pos(sx, sy + 1, map) {
+    if check_pos(sx, sy + 1, map, part_one, max_y) {
     
         // try diag left
-        if !check_pos(sx - 1, sy + 1, map) {
-            return try_set_sand(sx - 1, sy + 1, map, max_y);
+        if !check_pos(sx - 1, sy + 1, map, part_one, max_y) {
+            return try_set_sand(sx - 1, sy + 1, map, max_y, part_one);
         }
 
         // try diag right
-        if !check_pos(sx + 1, sy + 1, map) {
-            return try_set_sand(sx + 1, sy + 1, map, max_y);
+        if !check_pos(sx + 1, sy + 1, map, part_one, max_y) {
+            return try_set_sand(sx + 1, sy + 1, map, max_y, part_one);
+        }
+
+        // for part two check if we are at the top
+        if !part_one && sx == 500 && sy == 0 {
+            return false;
         }
 
         // stop sand here
@@ -108,7 +118,7 @@ fn try_set_sand(sx: i32, sy: i32, map: &mut HashMap<String, i32>, max_y: i32) ->
     }
 
     // otherwise keep dropping
-    try_set_sand(sx, sy + 1, map, max_y)
+    try_set_sand(sx, sy + 1, map, max_y, part_one)
 }
 
 struct Point {
@@ -125,7 +135,13 @@ fn set_map(x: i32, y: i32, map: &mut HashMap<String, i32>, val: i32) {
     map.insert(key, val );
 }
 
-fn check_pos(x: i32, y: i32, map: &HashMap<String, i32>) -> bool {
+fn check_pos(x: i32, y: i32, map: &HashMap<String, i32>, part_one: bool, max_y: i32) -> bool {
+    
+    if !part_one && y == max_y + 2 {
+        // this is the floor for part two
+        return true;
+    }
+    
     let key = get_key(x, y);
     map.get(&key).is_some()
 }
