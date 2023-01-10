@@ -13,6 +13,7 @@ mod day11;
 mod day12;
 mod day13;
 mod day14;
+mod day15;
 
 pub fn run_day(day: &str) -> bool {
     
@@ -32,6 +33,7 @@ pub fn run_day(day: &str) -> bool {
         "12" => day12::run_day(),
         "13" => day13::run_day(),
         "14" => day14::run_day(),
+        "15" => day15::run_day(),
         _ => return false
     }
     true
