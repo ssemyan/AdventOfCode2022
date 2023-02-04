@@ -7,7 +7,7 @@ pub fn run_day() {
         day_num: String::from("16"),
         part_1_test: String::from("1651"),
         part_1: String::from("1896"),
-        part_2_test: String::from(""),
+        part_2_test: String::from("1707"),
         part_2: String::from(""), 
     };
     day.run_tests(&run_parts);
@@ -18,6 +18,7 @@ pub fn run_day() {
         // Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
         let mut vlvs: HashMap<String, Valve> = HashMap::new();
         let mut vlvs_w_rate: Vec<String> = Vec::new();
+        let mut zero_vlvs: Vec<String> = Vec::new();
 
         // add the beginning
         vlvs_w_rate.push(String::from("AA"));
@@ -32,6 +33,8 @@ pub fn run_day() {
             vlvs.insert(v_name.clone(), Valve{v_rate, v_paths, v_dists});
             if v_rate > 0 {
                 vlvs_w_rate.push(v_name.clone());
+            } else if v_name != "AA" {
+                zero_vlvs.push(v_name.clone());
             }
         }
         
@@ -56,10 +59,60 @@ pub fn run_day() {
             }
         }
 
-        // traverse all paths but use menomization to save prev paths
-        let max_flow = best_path(&vlvs, String::from("AA"), 0, "AA", 0);
+        // traverse all the possible paths
+        let max_flow: i32;
+        if part_one {
+            max_flow = best_path(&vlvs, String::from("AA"), 0, "AA", 0);
+        } else {
+            // // get perms of path
+            // let mut valve_paths: Vec<String> = Vec::new();
+            // get_perms(&mut valve_paths, vlvs_w_rate, String::new(), String::new(), true);
+            // println!("Found {} perms", valve_paths.len());
+            // Get rid of all the zero flow valves except "AA"
+            for vlv_name in zero_vlvs {
+                vlvs.remove(&vlv_name);
+            }
+
+            max_flow = best_pathe(&vlvs, String::from("AA"), 0, "AA", 0, String::from("AA"), 0, "AA", 0);
+        }
         max_flow.to_string()
     }
+}
+
+fn get_perms(valve_paths: &mut Vec<String>, vlvs_w_rate: Vec<String>, my_path: String, e_path: String, my_turn: bool) {
+    
+    if vlvs_w_rate.len() == 0 {
+        // everything assigned
+        let path = format!("{},{}", my_path, e_path);
+        valve_paths.push(path);
+    }
+
+    // iterate where I get the next path
+    let remaining_valves_len = vlvs_w_rate.len();
+    for i in 0..remaining_valves_len {
+        let vlv_name = vlvs_w_rate[i].clone();
+        let mut new_my_path: String = String::from(&my_path);
+        if my_turn {
+            new_my_path = format!("{}|{}", String::from(&my_path), vlv_name);
+        } 
+        let mut new_e_path: String = String::from(&e_path);
+        if !my_turn {
+            new_e_path = format!("{}|{}", String::from(&e_path), vlv_name);
+        } 
+        let left_over_valves = get_except(&vlvs_w_rate, i);
+        get_perms(valve_paths, left_over_valves, new_my_path, new_e_path, !my_turn);
+    }
+    
+}
+
+fn get_except(strings: &Vec<String>, idx: usize) -> Vec<String> {
+    let mut ret: Vec<String> = Vec::new();
+    for i in 0..strings.len() {
+        if i != idx {
+            ret.push(strings[i].clone());
+        }
+    }
+    ret
 }
 
 fn get_dist(start_v: &String, end_v: &String, vlvs: &HashMap<String, Valve>, dist: i32, path: String) -> i32 {
@@ -107,6 +160,57 @@ fn best_path(vlvs: &HashMap<String, Valve>, cur_path: String, cur_flow: i32, cur
     if max_flow == 0 {
         return cur_flow;
     }
+    max_flow
+}
+
+fn best_pathe(vlvs: &HashMap<String, Valve>, cur_pathe: String, cur_flowe: i32, cur_v_namee: &str, cur_mine: i32, cur_pathm: String, cur_flowm: i32, cur_v_namem: &str, cur_minm: i32) -> i32 {
+
+    // max run time of 26 min 
+    if cur_mine >= 26 && cur_minm >= 26 {
+        return cur_flowe + cur_flowm;
+    }
+
+    // traverse from the current valve (assuming we turned it on previously)
+    // but now we can pick two paths to try
+    let mut max_flow = 0;
+    for e in &vlvs[cur_v_namee].v_dists {
+        if !cur_pathe.contains(e.0) && !cur_pathm.contains(e.0) {
+            let flowe = vlvs[e.0].v_rate;
+            let mut end_mine = cur_mine + e.1 + 1;
+            let mut pot_flowe = (26 - end_mine) * flowe;
+            if pot_flowe < 0 {
+                // would be going past 26 min so just reset
+                end_mine = 26;
+                pot_flowe = 0;
+            }
+            for m in &vlvs[cur_v_namem].v_dists {
+                if e.0 != m.0 {
+                    if !cur_pathe.contains(m.0) && !cur_pathm.contains(m.0) {
+                        let flowm = vlvs[m.0].v_rate;
+                        let mut end_minm = cur_minm + m.1 + 1;
+                        let mut pot_flowm = (26 - end_minm) * flowm;
+                        if pot_flowm < 0 {
+                            // would be going past 26 min so just reset
+                            end_minm = 26;
+                            pot_flowm = 0;
+                        }
+                        let path_flow = best_pathe(vlvs, format!("{}|{}", cur_pathe, e.0), cur_flowe + pot_flowe, &e.0, 
+                            end_mine, format!("{}|{}", cur_pathm, m.0), cur_flowm + pot_flowm, &m.0, end_minm);
+
+                        if path_flow > max_flow {
+                            max_flow = path_flow;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // No more paths to follow
+    if max_flow == 0 {
+        return cur_flowm + cur_flowe;
+    }
+
     max_flow
 }
 
